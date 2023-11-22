@@ -7,4 +7,6 @@ import ru.practicum.EndpointHitDto;
 public interface EndpointHitMapper {
 
     EndpointHit toEndpointHit(EndpointHitDto endpointHitDto);
+
+    EndpointHitDto toEndpointHitDto(EndpointHit endpointHit);
 }

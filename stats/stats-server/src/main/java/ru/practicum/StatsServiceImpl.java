@@ -32,6 +32,9 @@ public class StatsServiceImpl implements StatsService {
     }
 
     public List<ViewStatsDto> getStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+        if (start == null || end == null) {
+            throw new ValidationException("Время старта и окончания должны быть заполнены.");
+        }
         if (start.isAfter(end)) {
             throw new ValidationException("Дата начала не может быть позже даты окончания");
         }

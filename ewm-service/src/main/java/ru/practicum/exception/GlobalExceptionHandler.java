@@ -1,5 +1,6 @@
 package ru.practicum.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -61,8 +62,19 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorDto handleConflictException(ConflictException e) {
         return ErrorDto.builder()
-                .status(HttpStatus.CONFLICT)
+                .status(HttpStatus.FORBIDDEN)
                 .reason("For the requested operation the conditions are not met.")
+                .message(e.getMessage())
+                .errorTimestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorDto handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        return ErrorDto.builder()
+                .status(HttpStatus.CONFLICT)
+                .reason("Integrity constraint has been violated.")
                 .message(e.getMessage())
                 .errorTimestamp(LocalDateTime.now())
                 .build();

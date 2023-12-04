@@ -39,6 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
                         .collect(Collectors.toList());
     }
 
+    @Transactional
     public CategoryDto updateCategory(long id, CategoryDto categoryDto) {
         Category category = findById(id);
         if (categoryDto.getName() != null) {
@@ -53,6 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toCategoryDto(findById(id));
     }
 
+    @Transactional
     public CategoryDto deleteCategory(long id) {
         Category category = findById(id);
         categoryRepository.delete(category);

@@ -23,6 +23,8 @@ import ru.practicum.participationRequest.dto.ParticipationRequestDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -34,8 +36,8 @@ public class EventControllerPrivate {
 
     @GetMapping()
     public List<EventShortDto> getAllByInitiator(@PathVariable long userId,
-                                                 @Valid @RequestParam(defaultValue = "0") @Min(0) int from,
-                                                 @Valid @RequestParam(defaultValue = "10") @Min(1) int size) {
+                                                 @Valid @PositiveOrZero @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                 @Valid @Positive @RequestParam(defaultValue = "10") @Min(1) int size) {
         log.info("Поступил запрос на получение событий текущего пользователя с id{}", userId);
         return eventService.getAllByInitiator(userId, from, size);
     }

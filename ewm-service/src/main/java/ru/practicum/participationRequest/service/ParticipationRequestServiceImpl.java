@@ -2,6 +2,7 @@ package ru.practicum.participationRequest.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
@@ -41,6 +42,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto createParticipationRequest(long userId, long eventId) {
         User requestor = findUserById(userId);
         Event event = findEventById(eventId);
@@ -69,6 +71,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto updateParticipationRequest(long userId, long requestId) {
         findUserById(userId);
         ParticipationRequest participationRequest = findParticipationRequestById(requestId);

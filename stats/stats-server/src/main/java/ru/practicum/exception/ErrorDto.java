@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
+import static ru.practicum.DateTimeFormatConstants.DATE_TIME_FORMAT;
 
 @Data
 @Builder
@@ -22,6 +23,6 @@ public class ErrorDto {
     private StackTraceElement[] errors;
 
     @JsonProperty("timestamp")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
     private LocalDateTime errorTimestamp;
 }

@@ -14,6 +14,8 @@ import ru.practicum.category.service.CategoryService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -26,8 +28,8 @@ public class CategoryControllerPublic {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CategoryDto> getAllCategories(@Valid @RequestParam(defaultValue = "0") @Min(0) int from,
-                                              @Valid @RequestParam(defaultValue = "10") @Min(1) int size) {
+    public List<CategoryDto> getAllCategories(@Valid @PositiveOrZero @RequestParam(defaultValue = "0") @Min(0) int from,
+                                              @Valid @Positive @RequestParam(defaultValue = "10") @Min(1) int size) {
         log.info("Поступил запрос на получение списка категорий ");
         return categoryService.getAllCategories(from, size);
     }

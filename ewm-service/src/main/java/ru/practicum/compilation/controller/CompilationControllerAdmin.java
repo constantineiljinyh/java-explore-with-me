@@ -35,7 +35,8 @@ public class CompilationControllerAdmin {
 
     @PatchMapping("/{comId}")
     @ResponseStatus(HttpStatus.OK)
-    public CompilationDto updateCompilation(@PathVariable long comId, @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest) {
+    public CompilationDto updateCompilation(@PathVariable long comId,
+                                            @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest) {
         log.info("Поступил запрос на обновления информации подборки id{}", comId);
         return compilationService.updateCompilation(comId, updateCompilationRequest);
     }

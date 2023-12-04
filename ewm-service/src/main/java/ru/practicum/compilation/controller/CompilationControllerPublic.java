@@ -14,6 +14,8 @@ import ru.practicum.compilation.service.CompilationService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -27,8 +29,8 @@ public class CompilationControllerPublic {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<CompilationDto> getAllCompilation(@RequestParam(required = false) Boolean pinned,
-                                                  @Valid @RequestParam(defaultValue = "0") @Min(0) int from,
-                                                  @Valid @RequestParam(defaultValue = "10") @Min(1) int size) {
+                                                  @Valid @PositiveOrZero @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                  @Valid @Positive @RequestParam(defaultValue = "10") @Min(1) int size) {
         log.info("Поступил запрос на получение подборок событий");
         return compilationService.getAllCompilation(pinned, from, size);
     }

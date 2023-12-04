@@ -124,7 +124,8 @@ public class EventServiceImpl implements EventService {
                             .findFirst();
                     dto.setViews(matchingStats.map(ViewStatsDto::getHits).orElse(0L));
                 })
-                .peek(dto -> dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(), ParticipationRequestState.CONFIRMED)))
+                .peek(dto -> dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(),
+                        ParticipationRequestState.CONFIRMED)))
                 .collect(Collectors.toList());
     }
 
@@ -192,7 +193,8 @@ public class EventServiceImpl implements EventService {
         if (onlyAvailable) {
             eventList = eventList.stream()
                     .filter(event -> event.getParticipantLimit().equals(0L)
-                            || event.getParticipantLimit() < participationRequestRepository.countByEventIdAndStatus(event.getId(), ParticipationRequestState.CONFIRMED))
+                            || event.getParticipantLimit() < participationRequestRepository.countByEventIdAndStatus(event.getId(),
+                            ParticipationRequestState.CONFIRMED))
                     .collect(Collectors.toList());
         }
 
@@ -211,7 +213,8 @@ public class EventServiceImpl implements EventService {
                             .findFirst();
                     dto.setViews(matchingStats.map(ViewStatsDto::getHits).orElse(0L));
                 })
-                .peek(dto -> dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(), ParticipationRequestState.CONFIRMED)))
+                .peek(dto -> dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(),
+                        ParticipationRequestState.CONFIRMED)))
                 .collect(Collectors.toList());
 
         switch (sort) {
@@ -253,7 +256,8 @@ public class EventServiceImpl implements EventService {
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
         dto.setViews(viewStatsDto.isEmpty() ? 1 : viewStatsDto.get(0).getHits());
-        dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(), ParticipationRequestState.CONFIRMED));
+        dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(),
+                ParticipationRequestState.CONFIRMED));
 
         return dto;
     }
@@ -337,6 +341,8 @@ public class EventServiceImpl implements EventService {
                 case REJECT_EVENT:
                     event.setState(EventState.CANCELED);
                     break;
+                default:
+                    throw new IllegalArgumentException("Неизвестный статус: " + updateEventAdminRequest.getStateAction());
             }
         }
 
@@ -349,6 +355,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto updateEventByInitiator(long userId, long eventId, EventUpdateUserRequest updateEventUserRequest) {
         Event event = findEventById(eventId);
+        findUserById(userId);
         checkInitiator(userId, eventId, event.getInitiator().getId());
 
         if (updateEventUserRequest.getEventDate() != null && LocalDateTime.now().plusHours(2).isAfter(updateEventUserRequest.getEventDate())) {
@@ -384,6 +391,8 @@ public class EventServiceImpl implements EventService {
                 case CANCEL_REVIEW:
                     event.setState(EventState.CANCELED);
                     break;
+                default:
+                    throw new IllegalArgumentException("Неизвестный статус: " + updateEventUserRequest.getStateAction());
             }
         }
 
@@ -392,6 +401,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(event);
     }
 
+    @Override
     @Transactional
     public EventRequestStatusUpdateResult updateParticipationRequestsByInitiator(@PathVariable long userId,
                                                                                  @PathVariable long eventId,
@@ -441,6 +451,8 @@ public class EventServiceImpl implements EventService {
                     req.setStatus(ParticipationRequestState.REJECTED);
                     result.getRejectedRequests().add(participationRequestMapper.toParticipationRequestDto(req));
                     break;
+                default:
+                    throw new IllegalArgumentException("Неизвестный статус: " + eventRequestStatusUpdateRequest.getStatus());
             }
         }
 

@@ -18,6 +18,8 @@ import ru.practicum.event.service.EventService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,8 +36,8 @@ public class EventControllerAdmin {
                                                  @RequestParam(required = false) List<Long> categories,
                                                  @RequestParam(required = false) @DateTimeFormat(pattern = UtilConstants.DATETIME_FORMAT) LocalDateTime rangeStart,
                                                  @RequestParam(required = false) @DateTimeFormat(pattern = UtilConstants.DATETIME_FORMAT) LocalDateTime rangeEnd,
-                                                 @Valid @RequestParam(defaultValue = "0") @Min(0) int from,
-                                                 @Valid @RequestParam(defaultValue = "10") @Min(1) int size) {
+                                                 @Valid @PositiveOrZero @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                 @Valid @Positive @RequestParam(defaultValue = "10") @Min(1) int size) {
         log.info("Поступил запрос на поиск событий ");
         return eventService.getAllEventByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }

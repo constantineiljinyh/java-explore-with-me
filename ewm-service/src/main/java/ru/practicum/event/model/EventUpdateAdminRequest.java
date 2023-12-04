@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.event.location.LocationDto;
 
 import javax.validation.constraints.Future;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -23,9 +24,11 @@ public class EventUpdateAdminRequest {
 
     private LocationDto location;
 
+    @Pattern(regexp = "\\S.*", message = "Поле не должно состоять только из пробелов")
     @Size(min = 3, max = 120)
     private String title;
 
+    @Pattern(regexp = "\\S.*", message = "Поле не должно состоять только из пробелов")
     @Size(min = 20, max = 2000)
     private String annotation;
 
@@ -48,5 +51,4 @@ public class EventUpdateAdminRequest {
         PUBLISH_EVENT,
         REJECT_EVENT
     }
-
 }

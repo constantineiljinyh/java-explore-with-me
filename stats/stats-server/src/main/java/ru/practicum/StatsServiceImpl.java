@@ -25,13 +25,18 @@ public class StatsServiceImpl implements StatsService {
 
     private final ViewStatsMapper viewStatsMapper;
 
+    @Override
     @Transactional
     public EndpointHitDto saveEndpointHit(EndpointHitDto endpointHit, UriComponentsBuilder uriComponentsBuilder) {
         EndpointHit endpointHitsSave = endpointHitRepository.save(endpointHitMapper.toEndpointHit(endpointHit));
         return endpointHitMapper.toEndpointHitDto(endpointHitsSave);
     }
 
+    @Override
     public List<ViewStatsDto> getStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+        if (start == null || end == null) {
+            throw new ValidationException("Время старта и окончания должны быть заполнены.");
+        }
         if (start.isAfter(end)) {
             throw new ValidationException("Дата начала не может быть позже даты окончания");
         }

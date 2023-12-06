@@ -113,7 +113,8 @@ public class EventServiceImpl implements EventService {
                 .map(event -> "/events/" + event.getId())
                 .collect(Collectors.toList());
 
-        List<ViewStatsDto> viewStatsDto = statsClient.getStats(start.format(UtilConstants.getDefaultDateTimeFormatter()),
+        List<ViewStatsDto> viewStatsDto = statsClient.getStats(
+                start.format(UtilConstants.getDefaultDateTimeFormatter()),
                 end.format(UtilConstants.getDefaultDateTimeFormatter()), eventUrls, true);
 
         return page.getContent().stream()
@@ -124,8 +125,9 @@ public class EventServiceImpl implements EventService {
                             .findFirst();
                     dto.setViews(matchingStats.map(ViewStatsDto::getHits).orElse(0L));
                 })
-                .peek(dto -> dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(),
-                        ParticipationRequestState.CONFIRMED)))
+                .peek(dto -> dto.setConfirmedRequests(
+                        participationRequestRepository.countByEventIdAndStatus(dto.getId(),
+                                ParticipationRequestState.CONFIRMED)))
                 .collect(Collectors.toList());
     }
 
@@ -193,8 +195,9 @@ public class EventServiceImpl implements EventService {
         if (onlyAvailable) {
             eventList = eventList.stream()
                     .filter(event -> event.getParticipantLimit().equals(0L)
-                            || event.getParticipantLimit() < participationRequestRepository.countByEventIdAndStatus(event.getId(),
-                            ParticipationRequestState.CONFIRMED))
+                            || event.getParticipantLimit() <
+                            participationRequestRepository.countByEventIdAndStatus(event.getId(),
+                                    ParticipationRequestState.CONFIRMED))
                     .collect(Collectors.toList());
         }
 
@@ -202,7 +205,8 @@ public class EventServiceImpl implements EventService {
                 .map(event -> "/events/" + event.getId())
                 .collect(Collectors.toList());
 
-        List<ViewStatsDto> viewStatsDto = statsClient.getStats(start.format(UtilConstants.getDefaultDateTimeFormatter()),
+        List<ViewStatsDto> viewStatsDto = statsClient.getStats(
+                start.format(UtilConstants.getDefaultDateTimeFormatter()),
                 end.format(UtilConstants.getDefaultDateTimeFormatter()), eventUrls, true);
 
         List<EventShortDto> eventShortDtoList = eventList.stream()
@@ -213,8 +217,9 @@ public class EventServiceImpl implements EventService {
                             .findFirst();
                     dto.setViews(matchingStats.map(ViewStatsDto::getHits).orElse(0L));
                 })
-                .peek(dto -> dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(),
-                        ParticipationRequestState.CONFIRMED)))
+                .peek(dto -> dto.setConfirmedRequests(
+                        participationRequestRepository.countByEventIdAndStatus(dto.getId(),
+                                ParticipationRequestState.CONFIRMED)))
                 .collect(Collectors.toList());
 
         switch (sort) {
@@ -251,8 +256,10 @@ public class EventServiceImpl implements EventService {
 
         List<String> eventUrls = Collections.singletonList("/events/" + event.getId());
 
-        List<ViewStatsDto> viewStatsDto = statsClient.getStats(UtilConstants.getMinDateTime().format(UtilConstants.getDefaultDateTimeFormatter()),
-                UtilConstants.getMaxDateTime().plusYears(1).format(UtilConstants.getDefaultDateTimeFormatter()), eventUrls, true);
+        List<ViewStatsDto> viewStatsDto = statsClient.getStats(
+                UtilConstants.getMinDateTime().format(UtilConstants.getDefaultDateTimeFormatter()),
+                UtilConstants.getMaxDateTime().plusYears(1).format(
+                        UtilConstants.getDefaultDateTimeFormatter()), eventUrls, true);
 
         EventFullDto dto = eventMapper.toEventFullDto(event);
         dto.setViews(viewStatsDto.isEmpty() ? 1 : viewStatsDto.get(0).getHits());
@@ -299,7 +306,8 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateEventByAdmin(long eventId, EventUpdateAdminRequest updateEventAdminRequest) {
         Event event = findEventById(eventId);
 
-        if (updateEventAdminRequest.getEventDate() != null && LocalDateTime.now().plusHours(1).isAfter(updateEventAdminRequest.getEventDate())) {
+        if (updateEventAdminRequest.getEventDate() != null
+                && LocalDateTime.now().plusHours(1).isAfter(updateEventAdminRequest.getEventDate())) {
             throw new ConflictException("Дата события должна быть через 1 час после текущего времени или позже.");
 
         }
@@ -307,12 +315,14 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequest.getStateAction() != null) {
             if (updateEventAdminRequest.getStateAction().equals(EventUpdateAdminRequest.StateAction.PUBLISH_EVENT) &&
                     !event.getState().equals(EventState.PENDING)) {
-                throw new ConflictException("Cобытие можно публиковать, только если оно в состоянии ожидания публикации: " + event.getState());
+                throw new ConflictException("Cобытие можно публиковать, только если оно в состоянии ожидания публикации: "
+                        + event.getState());
             }
 
             if (updateEventAdminRequest.getStateAction().equals(EventUpdateAdminRequest.StateAction.REJECT_EVENT) &&
                     event.getState().equals(EventState.PUBLISHED)) {
-                throw new ConflictException("Cобытие можно отклонить, только если оно еще не опубликовано: " + event.getState());
+                throw new ConflictException("Cобытие можно отклонить, только если оно еще не опубликовано: " +
+                        event.getState());
             }
         }
 
@@ -346,8 +356,6 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        event = eventRepository.save(event);
-
         return eventMapper.toEventFullDto(event);
     }
 
@@ -358,7 +366,8 @@ public class EventServiceImpl implements EventService {
         findUserById(userId);
         checkInitiator(userId, eventId, event.getInitiator().getId());
 
-        if (updateEventUserRequest.getEventDate() != null && LocalDateTime.now().plusHours(2).isAfter(updateEventUserRequest.getEventDate())) {
+        if (updateEventUserRequest.getEventDate() != null &&
+                LocalDateTime.now().plusHours(2).isAfter(updateEventUserRequest.getEventDate())) {
             throw new ConflictException("Дата события должна быть через 2 часа после текущего времени или позже.");
         }
 
@@ -396,8 +405,6 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        event = eventRepository.save(event);
-
         return eventMapper.toEventFullDto(event);
     }
 
@@ -409,16 +416,19 @@ public class EventServiceImpl implements EventService {
         findUserById(userId);
         Event event = findEventById(eventId);
 
-        long confirmLimit = event.getParticipantLimit() - participationRequestRepository.countByEventIdAndStatus(eventId, ParticipationRequestState.CONFIRMED);
+        long confirmLimit = event.getParticipantLimit() - participationRequestRepository.countByEventIdAndStatus(
+                eventId, ParticipationRequestState.CONFIRMED);
 
         if (confirmLimit <= 0) {
             throw new ConflictException("Лимит участников достигнут");
         }
 
-        List<ParticipationRequest> requestList = participationRequestRepository.findAllByIdIn(eventRequestStatusUpdateRequest.getRequestIds());
+        List<ParticipationRequest> requestList = participationRequestRepository.findAllByIdIn(
+                eventRequestStatusUpdateRequest.getRequestIds());
 
         List<Long> notFoundIds = eventRequestStatusUpdateRequest.getRequestIds().stream()
-                .filter(requestId -> requestList.stream().noneMatch(request -> request.getId().equals(requestId)))
+                .filter(requestId -> requestList.stream().noneMatch(
+                        request -> request.getId().equals(requestId)))
                 .collect(Collectors.toList());
 
         if (!notFoundIds.isEmpty()) {
@@ -455,9 +465,6 @@ public class EventServiceImpl implements EventService {
                     throw new IllegalArgumentException("Неизвестный статус: " + eventRequestStatusUpdateRequest.getStatus());
             }
         }
-
-        participationRequestRepository.saveAll(requestList);
-
         return result;
     }
 

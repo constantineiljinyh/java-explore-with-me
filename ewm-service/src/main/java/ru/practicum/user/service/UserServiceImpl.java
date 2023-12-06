@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
+
     private final UserRepository userRepository;
 
     @Override

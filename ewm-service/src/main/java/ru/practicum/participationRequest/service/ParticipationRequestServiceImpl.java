@@ -65,7 +65,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         participationRequest.setRequester(requestor);
         participationRequest.setEvent(event);
         participationRequest.setCreated(LocalDateTime.now());
-        participationRequest.setStatus(event.getRequestModeration() && !event.getParticipantLimit().equals(0L) ? ParticipationRequestState.PENDING : ParticipationRequestState.CONFIRMED);
+        participationRequest.setStatus(event.getRequestModeration() && !event.getParticipantLimit().equals(0L)
+                ? ParticipationRequestState.PENDING : ParticipationRequestState.CONFIRMED);
 
         return participationRequestMapper.toParticipationRequestDto(participationRequestRepository.save(participationRequest));
     }
@@ -82,7 +83,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         participationRequest.setStatus(ParticipationRequestState.CANCELED);
 
-        return participationRequestMapper.toParticipationRequestDto(participationRequestRepository.save(participationRequest));
+        return participationRequestMapper.toParticipationRequestDto(participationRequest);
     }
 
     private ParticipationRequest findParticipationRequestById(long id) {

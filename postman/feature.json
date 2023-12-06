@@ -200,7 +200,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{baseUrl}}/users/{{uid}}/comments?from=0&size=10",
+					"raw": "{{baseUrl}}/users/{{uid}}/comments",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -212,11 +212,15 @@
 					"query": [
 						{
 							"key": "from",
-							"value": "0"
+							"value": "0",
+							"description": "количество элементов, которые нужно пропустить для формирования текущего набора",
+							"disabled": true
 						},
 						{
 							"key": "size",
-							"value": "10"
+							"value": "1000",
+							"description": "количество элементов в наборе",
+							"disabled": true
 						}
 					]
 				}

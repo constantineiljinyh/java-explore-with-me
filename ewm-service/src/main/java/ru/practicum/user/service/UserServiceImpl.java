@@ -1,6 +1,7 @@
 package ru.practicum.user.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
@@ -56,6 +58,9 @@ public class UserServiceImpl implements UserService {
 
     private User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Юзер с таким id= " + id + " не найден."));
+                .orElseThrow(() -> {
+                    log.error("Пользователь не найден: Не удалось найти пользователя с id={}", id);
+                    return new NotFoundException("Пользователя с таким id=" + id + " не найдено");
+                });
     }
 }

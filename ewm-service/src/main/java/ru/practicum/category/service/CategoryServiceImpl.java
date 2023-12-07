@@ -1,6 +1,7 @@
 package ru.practicum.category.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
@@ -61,7 +63,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     private Category findById(long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Категории с таким id= " + id + " не найдено."));
+                .orElseThrow(() -> {
+                    log.error("Категория не найдена: Не удалось найти категорию с id={}", id);
+                    return new NotFoundException("Категории с таким id=" + id + " не найдено.");
+                });
     }
 
 }

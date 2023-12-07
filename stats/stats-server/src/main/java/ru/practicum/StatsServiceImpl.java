@@ -35,9 +35,12 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public List<ViewStatsDto> getStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         if (start == null || end == null) {
+            log.debug("Ошибка валидации: Время старта или окончания не заданы. Время старта: {}, Время окончания: {}", start, end);
             throw new ValidationException("Время старта и окончания должны быть заполнены.");
         }
+
         if (start.isAfter(end)) {
+            log.debug("Ошибка валидации: Дата начала ({}), позже даты окончания ({}).", start, end);
             throw new ValidationException("Дата начала не может быть позже даты окончания");
         }
 

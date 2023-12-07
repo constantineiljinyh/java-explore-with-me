@@ -1,6 +1,7 @@
 package ru.practicum.comment.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
@@ -73,6 +75,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = findCommentById(commentId);
 
         if (!comment.getUser().getId().equals(userId)) {
+            log.debug("Доступ запрещен: Пользователь с id={} не является автором комментария с id={}", userId, commentId);
             throw new ForbiddenException("Юзер с id=" + userId + " не является автором комментария с id=" + commentId);
         }
         Optional.ofNullable(commentNewDto.getText()).ifPresent(comment::setText);
@@ -97,6 +100,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = findCommentById(commentId);
 
         if (!comment.getUser().getId().equals(userId)) {
+            log.debug("Доступ запрещен: Пользователь с id={} не является автором комментария с id={}", userId, commentId);
             throw new ForbiddenException("Юзер с id=" + userId + " не является автором комментария с id=" + commentId);
         }
 
@@ -113,16 +117,25 @@ public class CommentServiceImpl implements CommentService {
 
     private Comment findCommentById(long id) {
         return commentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Комментария с таким id=" + id + " не найдено"));
+                .orElseThrow(() -> {
+                    log.error("Комментарий не найден: Не удалось найти комментарий с id={}", id);
+                    return new NotFoundException("Комментария с таким id=" + id + " не найдено");
+                });
     }
 
     private Event findEventById(long id) {
         return eventRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("События с таким id=" + id + " не найдено"));
+                .orElseThrow(() -> {
+                    log.error("Событие не найдено: Не удалось найти событие с id={}", id);
+                    return new NotFoundException("События с таким id=" + id + " не найдено");
+                });
     }
 
     private User findUserById(long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователя с таким id=" + id + " не найдено"));
+                .orElseThrow(() -> {
+                    log.error("Пользователь не найден: Не удалось найти пользователя с id={}", id);
+                    return new NotFoundException("Пользователя с таким id=" + id + " не найдено");
+                });
     }
 }

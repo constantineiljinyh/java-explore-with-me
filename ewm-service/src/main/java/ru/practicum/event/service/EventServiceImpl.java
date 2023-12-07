@@ -1,6 +1,7 @@
 package ru.practicum.event.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -53,6 +54,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
@@ -244,6 +246,7 @@ public class EventServiceImpl implements EventService {
         Event event = findEventById(eventId);
 
         if (!event.getState().equals(EventState.PUBLISHED)) {
+            log.debug("Событие не найдено: Не удалось найти событие с id={}", eventId);
             throw new NotFoundException("События с таким id=" + eventId + " не найдено");
         }
 
@@ -273,6 +276,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto createEvent(long userId, EventNewDto eventNewDto) {
         if (LocalDateTime.now().plusHours(2).isAfter(eventNewDto.getEventDate())) {
+            log.debug("Конфликт: Дата события должна быть через 2 часа после текущего времени или позже." +
+                    " Текущее время: {}, Время события: {}", LocalDateTime.now(), eventNewDto.getEventDate());
             throw new ConflictException("Дата события должна быть через 2 часа после текущего времени или позже.");
         }
 
@@ -308,6 +313,9 @@ public class EventServiceImpl implements EventService {
 
         if (updateEventAdminRequest.getEventDate() != null
                 && LocalDateTime.now().plusHours(1).isAfter(updateEventAdminRequest.getEventDate())) {
+            log.debug("Конфликт: Дата события должна быть через 1 час после текущего времени или позже." +
+                            " Текущее время: {}, Время события: {}",
+                    LocalDateTime.now(), updateEventAdminRequest.getEventDate());
             throw new ConflictException("Дата события должна быть через 1 час после текущего времени или позже.");
 
         }
@@ -315,12 +323,16 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequest.getStateAction() != null) {
             if (updateEventAdminRequest.getStateAction().equals(EventUpdateAdminRequest.StateAction.PUBLISH_EVENT) &&
                     !event.getState().equals(EventState.PENDING)) {
+                log.debug("Конфликт: Cобытие можно публиковать, только если оно в состоянии ожидания публикации." +
+                        " Текущее состояние: {}", event.getState());
                 throw new ConflictException("Cобытие можно публиковать, только если оно в состоянии ожидания публикации: "
                         + event.getState());
             }
 
             if (updateEventAdminRequest.getStateAction().equals(EventUpdateAdminRequest.StateAction.REJECT_EVENT) &&
                     event.getState().equals(EventState.PUBLISHED)) {
+                log.debug("Конфликт: Cобытие можно отклонить, только если оно еще не опубликовано." +
+                        " Текущее состояние: {}", event.getState());
                 throw new ConflictException("Cобытие можно отклонить, только если оно еще не опубликовано: " +
                         event.getState());
             }
@@ -352,6 +364,7 @@ public class EventServiceImpl implements EventService {
                     event.setState(EventState.CANCELED);
                     break;
                 default:
+                    log.debug("Неизвестный статус: {}", updateEventAdminRequest.getStateAction());
                     throw new IllegalArgumentException("Неизвестный статус: " + updateEventAdminRequest.getStateAction());
             }
         }
@@ -368,11 +381,16 @@ public class EventServiceImpl implements EventService {
 
         if (updateEventUserRequest.getEventDate() != null &&
                 LocalDateTime.now().plusHours(2).isAfter(updateEventUserRequest.getEventDate())) {
+            log.debug("Конфликт: Дата события должна быть через 2 часа после текущего времени или позже." +
+                            " Текущее время: {}, Время события: {}",
+                    LocalDateTime.now(), updateEventUserRequest.getEventDate());
             throw new ConflictException("Дата события должна быть через 2 часа после текущего времени или позже.");
         }
 
         if (!(event.getState().equals(EventState.CANCELED) ||
                 event.getState().equals(EventState.PENDING))) {
+            log.debug("Конфликт: Можно изменять только отложенные или отмененные события." +
+                    " Текущее состояние: {}", event.getState());
             throw new ConflictException("Можно изменить только отложенные или отмененные события.");
         }
 
@@ -401,6 +419,7 @@ public class EventServiceImpl implements EventService {
                     event.setState(EventState.CANCELED);
                     break;
                 default:
+                    log.debug("Неизвестный статус: {}", updateEventUserRequest.getStateAction());
                     throw new IllegalArgumentException("Неизвестный статус: " + updateEventUserRequest.getStateAction());
             }
         }
@@ -420,6 +439,7 @@ public class EventServiceImpl implements EventService {
                 eventId, ParticipationRequestState.CONFIRMED);
 
         if (confirmLimit <= 0) {
+            log.debug("Конфликт: Лимит участников достигнут. Текущий лимит: {}", confirmLimit);
             throw new ConflictException("Лимит участников достигнут");
         }
 
@@ -432,6 +452,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
 
         if (!notFoundIds.isEmpty()) {
+            log.debug("Заявка на участие не найдена: {}", notFoundIds);
             throw new NotFoundException("Заявка на участие с id= " + notFoundIds + " не найдена");
         }
 
@@ -442,6 +463,7 @@ public class EventServiceImpl implements EventService {
 
         for (ParticipationRequest req : requestList) {
             if (!req.getEvent().getId().equals(eventId)) {
+                log.debug("Заявка на участие не найдена: {}", req.getId());
                 throw new NotFoundException("Заявка на участие с id= " + req.getId() + " не найдена");
             }
 
@@ -462,6 +484,7 @@ public class EventServiceImpl implements EventService {
                     result.getRejectedRequests().add(participationRequestMapper.toParticipationRequestDto(req));
                     break;
                 default:
+                    log.debug("Неизвестный статус: {}", eventRequestStatusUpdateRequest.getStatus());
                     throw new IllegalArgumentException("Неизвестный статус: " + eventRequestStatusUpdateRequest.getStatus());
             }
         }
@@ -470,22 +493,32 @@ public class EventServiceImpl implements EventService {
 
     private Event findEventById(long id) {
         return eventRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("События с таким id=" + id + " не найдено"));
+                .orElseThrow(() -> {
+                    log.error("Событие не найдено: Не удалось найти событие с id={}", id);
+                    return new NotFoundException("События с таким id=" + id + " не найдено");
+                });
     }
 
     private User findUserById(long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователя с таким id=" + id + " не найдено"));
+                .orElseThrow(() -> {
+                    log.error("Пользователь не найден: Не удалось найти пользователя с id={}", id);
+                    return new NotFoundException("Пользователя с таким id=" + id + " не найдено");
+                });
     }
 
     private Category findCategoryById(long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Категории с таким id=" + id + " не найдено"));
+                .orElseThrow(() -> {
+                    log.error("Категория не найдена: Не удалось найти категорию с id={}", id);
+                    return new NotFoundException("Категории с таким id=" + id + " не найдено.");
+                });
     }
 
     private void checkInitiator(long userId, long eventId, long initiatorId) {
         if (userId != initiatorId) {
-            throw new NotFoundException("События с таким id=" + eventId + " не найдено");
+            log.error("Недостаточно прав: Пользователь с id={} не является инициатором события с id={}", userId, eventId);
+            throw new NotFoundException("Вы не являетесь инициатором события с id=" + eventId);
         }
     }
 

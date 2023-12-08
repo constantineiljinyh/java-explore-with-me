@@ -1,6 +1,7 @@
 package ru.practicum.compilation.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
@@ -58,7 +60,8 @@ public class CompilationServiceImpl implements CompilationService {
             compilationNewDto.setPinned(false);
         }
 
-        Compilation savedCompilation = compilationRepository.save(compilationMapper.toCompilation(compilationNewDto, events));
+        Compilation savedCompilation = compilationRepository.save(
+                compilationMapper.toCompilation(compilationNewDto, events));
 
         return compilationMapper.toCompilationDto(savedCompilation);
     }
@@ -98,6 +101,9 @@ public class CompilationServiceImpl implements CompilationService {
 
     private Compilation findCompilationById(long id) {
         return compilationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Подборки с таким id= " + id + " не найдено."));
+                .orElseThrow(() -> {
+                    log.error("Подборка не найдена: Не удалось найти подборку с id={}", id);
+                    return new NotFoundException("Подборки с таким id=" + id + " не найдено.");
+                });
     }
 }

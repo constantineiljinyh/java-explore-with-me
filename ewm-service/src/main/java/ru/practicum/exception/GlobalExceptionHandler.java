@@ -59,10 +59,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorDto handleForbiddenException(ForbiddenException e) {
+        return ErrorDto.builder()
+                .status(HttpStatus.FORBIDDEN)
+                .reason("The required action forbidden.")
+                .message(e.getMessage())
+                .errorTimestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorDto handleConflictException(ConflictException e) {
         return ErrorDto.builder()
-                .status(HttpStatus.FORBIDDEN)
+                .status(HttpStatus.CONFLICT)
                 .reason("For the requested operation the conditions are not met.")
                 .message(e.getMessage())
                 .errorTimestamp(LocalDateTime.now())
